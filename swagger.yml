@@ -1,0 +1,88 @@
+consumes:
+  - application/json
+
+info:
+  description: From the movie detail on go swagger.io
+  title: Movie
+  version: 0.1.0
+
+produces:
+  - application/json
+schemes:
+  - http
+
+swagger: "2.0"
+definitions:
+  movie:
+    type: object
+    required:
+      - title
+    properties:
+      id:
+        type: integer
+        format: int64
+        readOnly: true
+      title:
+        type: string
+        minLength: 2
+      genre:
+        type: string
+        minLength: 2
+
+  error:
+    type: object
+    required:
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+
+paths:
+  /movie/create:
+    post:
+      tags:
+        - movie
+      description: create movie by given fields is title and genre
+      parameters:
+        - description: create movie with the input payload.
+          in: body
+          name: movie
+          required: true
+          schema:
+            $ref: '#/definitions/movie'
+      responses:
+        200:
+          description: create the movie operations
+          schema:
+            $ref: "#/definitions/movie"
+        default:
+          description: failed to create movie
+          schema:
+            $ref: "#/definitions/error"
+      summary: create movie by given payload.
+
+  /movie/get:
+    get:
+      tags:
+        - movie
+      description: get movie by the given movie id.
+
+      parameters:
+        - description: get movie by given id
+          in: query
+          name: id
+          required: true
+          type: string
+      responses:
+        200:
+          description: get the movie operations
+          schema:
+            $ref: "#/definitions/movie"
+        default:
+          description: failed to get movie
+          schema:
+            $ref: "#/definitions/error"
+      summary: get movie by given id.
