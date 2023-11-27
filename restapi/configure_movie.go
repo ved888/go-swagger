@@ -10,6 +10,8 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
 	"go-swagger/dbhelper"
+	"go-swagger/jwt"
+	"go-swagger/restapi/operations/user"
 
 	"go-swagger/database"
 
@@ -24,7 +26,6 @@ import (
 
 func configureFlags(api *operations.MovieAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
-
 }
 
 func configureAPI(api *operations.MovieAPI) http.Handler {
@@ -36,7 +37,6 @@ func configureAPI(api *operations.MovieAPI) http.Handler {
 	if err != nil {
 		fmt.Println("db error ", err)
 	}
-
 	// Set your custom logger if needed. Default one is log.Printf
 	// Expected interface func(string, ...interface{})
 	//
@@ -45,31 +45,50 @@ func configureAPI(api *operations.MovieAPI) http.Handler {
 
 	api.UseSwaggerUI()
 	// To continue using redoc as your UI, uncomment the following line
-	//api.UseRedoc()
+	// api.UseRedoc()
 
 	api.JSONConsumer = runtime.JSONConsumer()
 
 	api.JSONProducer = runtime.JSONProducer()
 
-	//if api.MovieGetMovieGetHandler == nil {
-	api.MovieGetMovieGetHandler = movie.GetMovieGetHandlerFunc(func(params movie.GetMovieGetParams) middleware.Responder {
-		getMovie, err := dbhelper.GetMovieById(db, params.ID)
+	if api.MovieGetMovieGetHandler == nil {
+		api.MovieGetMovieGetHandler = movie.GetMovieGetHandlerFunc(func(params movie.GetMovieGetParams) middleware.Responder {
+			getMovie, err := dbhelper.GetMovieById(db, params.ID)
+			if err != nil {
+				return movie.NewGetMovieGetDefault(500).WithPayload(&models.Error{Code: 200, Message: swag.String(err.Error())})
+			}
+			return movie.NewGetMovieGetOK().WithPayload(getMovie)
+		})
+	}
+	//if api.UserPostLoginHandler == nil {
+	api.UserPostLoginHandler = user.PostLoginHandlerFunc(func(params user.PostLoginParams) middleware.Responder {
+		login, err := dbhelper.GetUserByEmailAndPhone(db, params.Login.UserPhone, params.Login.UserEmail)
 		if err != nil {
-			return movie.NewGetMovieGetDefault(500).WithPayload(&models.Error{Code: 200, Message: swag.String(err.Error())})
+			return user.NewPostLoginDefault(500).WithPayload(&models.Error{Code: 200, Message: swag.String(err.Error())})
 		}
-		return movie.NewGetMovieGetOK().WithPayload(getMovie)
-
-		return middleware.NotImplemented("operation movie.GetMovieGet has not yet been implemented")
+		token, err := jwt.GenerateJWTToken(*login.Phone, *login.Email)
+		if err != nil {
+			return user.NewPostLoginDefault(500).WithPayload(&models.Error{Code: 200, Message: swag.String(err.Error())})
+		}
+		return user.NewPostLoginOK().WithPayload(&models.LoginSuccess{Success: true, Token: token})
 	})
-	//	}
-	//if api.MoviePostMovieCreateHandler == nil {
-	api.MoviePostMovieCreateHandler = movie.PostMovieCreateHandlerFunc(func(params movie.PostMovieCreateParams) middleware.Responder {
-		createMovie, err := dbhelper.MovieCreate(db, params.Movie)
+	//}
+	if api.MoviePostMovieCreateHandler == nil {
+		api.MoviePostMovieCreateHandler = movie.PostMovieCreateHandlerFunc(func(params movie.PostMovieCreateParams) middleware.Responder {
+			createMovie, err := dbhelper.MovieCreate(db, params.Movie)
+			if err != nil {
+				return movie.NewPostMovieCreateDefault(500).WithPayload(&models.Error{Code: 200, Message: swag.String(err.Error())})
+			}
+			return movie.NewPostMovieCreateOK().WithPayload(createMovie)
+		})
+	}
+	//if api.UserPostUserCreateHandler == nil {
+	api.UserPostUserCreateHandler = user.PostUserCreateHandlerFunc(func(params user.PostUserCreateParams) middleware.Responder {
+		createUser, err := dbhelper.CreateUser(db, params.Register)
 		if err != nil {
-			return movie.NewPostMovieCreateDefault(500).WithPayload(&models.Error{Code: 200, Message: swag.String(err.Error())})
+			return user.NewPostUserCreateDefault(500).WithPayload(&models.Error{Code: 200, Message: swag.String(err.Error())})
 		}
-		return movie.NewPostMovieCreateOK().WithPayload(createMovie)
-		return middleware.NotImplemented("operation movie.PostMovieCreate has not yet been implemented")
+		return user.NewPostUserCreateOK().WithPayload(createUser)
 	})
 	//}
 

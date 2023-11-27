@@ -20,6 +20,7 @@ import (
 	"github.com/go-openapi/swag"
 
 	"go-swagger/restapi/operations/movie"
+	"go-swagger/restapi/operations/user"
 )
 
 // NewMovieAPI creates a new Movie instance
@@ -47,8 +48,14 @@ func NewMovieAPI(spec *loads.Document) *MovieAPI {
 		MovieGetMovieGetHandler: movie.GetMovieGetHandlerFunc(func(params movie.GetMovieGetParams) middleware.Responder {
 			return middleware.NotImplemented("operation movie.GetMovieGet has not yet been implemented")
 		}),
+		UserPostLoginHandler: user.PostLoginHandlerFunc(func(params user.PostLoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.PostLogin has not yet been implemented")
+		}),
 		MoviePostMovieCreateHandler: movie.PostMovieCreateHandlerFunc(func(params movie.PostMovieCreateParams) middleware.Responder {
 			return middleware.NotImplemented("operation movie.PostMovieCreate has not yet been implemented")
+		}),
+		UserPostUserCreateHandler: user.PostUserCreateHandlerFunc(func(params user.PostUserCreateParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.PostUserCreate has not yet been implemented")
 		}),
 	}
 }
@@ -86,8 +93,12 @@ type MovieAPI struct {
 
 	// MovieGetMovieGetHandler sets the operation handler for the get movie get operation
 	MovieGetMovieGetHandler movie.GetMovieGetHandler
+	// UserPostLoginHandler sets the operation handler for the post login operation
+	UserPostLoginHandler user.PostLoginHandler
 	// MoviePostMovieCreateHandler sets the operation handler for the post movie create operation
 	MoviePostMovieCreateHandler movie.PostMovieCreateHandler
+	// UserPostUserCreateHandler sets the operation handler for the post user create operation
+	UserPostUserCreateHandler user.PostUserCreateHandler
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -167,8 +178,14 @@ func (o *MovieAPI) Validate() error {
 	if o.MovieGetMovieGetHandler == nil {
 		unregistered = append(unregistered, "movie.GetMovieGetHandler")
 	}
+	if o.UserPostLoginHandler == nil {
+		unregistered = append(unregistered, "user.PostLoginHandler")
+	}
 	if o.MoviePostMovieCreateHandler == nil {
 		unregistered = append(unregistered, "movie.PostMovieCreateHandler")
+	}
+	if o.UserPostUserCreateHandler == nil {
+		unregistered = append(unregistered, "user.PostUserCreateHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -265,7 +282,15 @@ func (o *MovieAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/login"] = user.NewPostLogin(o.context, o.UserPostLoginHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/movie/create"] = movie.NewPostMovieCreate(o.context, o.MoviePostMovieCreateHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/user/create"] = user.NewPostUserCreate(o.context, o.UserPostUserCreateHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

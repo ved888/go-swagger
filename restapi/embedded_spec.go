@@ -34,6 +34,40 @@ func init() {
     "version": "0.1.0"
   },
   "paths": {
+    "/login": {
+      "post": {
+        "description": "Login user by email and phone number",
+        "tags": [
+          "user"
+        ],
+        "summary": "login user by given email and phone.",
+        "parameters": [
+          {
+            "description": "Login user by given payload",
+            "name": "Login",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "login the user operations",
+            "schema": {
+              "$ref": "#/definitions/LoginSuccess"
+            }
+          },
+          "default": {
+            "description": "failed to login user",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
     "/movie/create": {
       "post": {
         "description": "create movie by given fields is title and genre",
@@ -99,9 +133,109 @@ func init() {
           }
         }
       }
+    },
+    "/user/create": {
+      "post": {
+        "description": "create user by given fields",
+        "tags": [
+          "user"
+        ],
+        "summary": "create user by given payload.",
+        "parameters": [
+          {
+            "description": "create user with given input payload",
+            "name": "Register",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Register"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "create the user operations",
+            "schema": {
+              "$ref": "#/definitions/Register"
+            }
+          },
+          "default": {
+            "description": "failed to create user",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
+    "Login": {
+      "type": "object",
+      "required": [
+        "UserEmail",
+        "UserPhone"
+      ],
+      "properties": {
+        "UserEmail": {
+          "type": "string",
+          "format": "abc@gmail.com"
+        },
+        "UserPhone": {
+          "type": "string",
+          "maxLength": 10,
+          "minLength": 10
+        }
+      }
+    },
+    "LoginSuccess": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "Register": {
+      "type": "object",
+      "required": [
+        "Name",
+        "Email",
+        "Phone",
+        "DOB"
+      ],
+      "properties": {
+        "Address": {
+          "type": "string",
+          "minLength": 2
+        },
+        "DOB": {
+          "type": "string",
+          "format": "yyyy-mm-dd"
+        },
+        "Email": {
+          "type": "string",
+          "format": "abc@gmail.com"
+        },
+        "Name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "Phone": {
+          "type": "string",
+          "maxLength": 10,
+          "minLength": 10
+        },
+        "userId": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        }
+      }
+    },
     "error": {
       "type": "object",
       "required": [
@@ -129,7 +263,7 @@ func init() {
         },
         "id": {
           "type": "integer",
-          "format": "uuid.uuid",
+          "format": "int64",
           "readOnly": true
         },
         "title": {
@@ -137,6 +271,13 @@ func init() {
           "minLength": 2
         }
       }
+    }
+  },
+  "securityDefinitions": {
+    "key": {
+      "type": "apiKey",
+      "name": "x-token",
+      "in": "header"
     }
   }
 }`))
@@ -157,6 +298,40 @@ func init() {
     "version": "0.1.0"
   },
   "paths": {
+    "/login": {
+      "post": {
+        "description": "Login user by email and phone number",
+        "tags": [
+          "user"
+        ],
+        "summary": "login user by given email and phone.",
+        "parameters": [
+          {
+            "description": "Login user by given payload",
+            "name": "Login",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "login the user operations",
+            "schema": {
+              "$ref": "#/definitions/LoginSuccess"
+            }
+          },
+          "default": {
+            "description": "failed to login user",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
     "/movie/create": {
       "post": {
         "description": "create movie by given fields is title and genre",
@@ -222,9 +397,109 @@ func init() {
           }
         }
       }
+    },
+    "/user/create": {
+      "post": {
+        "description": "create user by given fields",
+        "tags": [
+          "user"
+        ],
+        "summary": "create user by given payload.",
+        "parameters": [
+          {
+            "description": "create user with given input payload",
+            "name": "Register",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Register"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "create the user operations",
+            "schema": {
+              "$ref": "#/definitions/Register"
+            }
+          },
+          "default": {
+            "description": "failed to create user",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
+    "Login": {
+      "type": "object",
+      "required": [
+        "UserEmail",
+        "UserPhone"
+      ],
+      "properties": {
+        "UserEmail": {
+          "type": "string",
+          "format": "abc@gmail.com"
+        },
+        "UserPhone": {
+          "type": "string",
+          "maxLength": 10,
+          "minLength": 10
+        }
+      }
+    },
+    "LoginSuccess": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "Register": {
+      "type": "object",
+      "required": [
+        "Name",
+        "Email",
+        "Phone",
+        "DOB"
+      ],
+      "properties": {
+        "Address": {
+          "type": "string",
+          "minLength": 2
+        },
+        "DOB": {
+          "type": "string",
+          "format": "yyyy-mm-dd"
+        },
+        "Email": {
+          "type": "string",
+          "format": "abc@gmail.com"
+        },
+        "Name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "Phone": {
+          "type": "string",
+          "maxLength": 10,
+          "minLength": 10
+        },
+        "userId": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        }
+      }
+    },
     "error": {
       "type": "object",
       "required": [
@@ -252,7 +527,7 @@ func init() {
         },
         "id": {
           "type": "integer",
-          "format": "uuid.uuid",
+          "format": "int64",
           "readOnly": true
         },
         "title": {
@@ -260,6 +535,13 @@ func init() {
           "minLength": 2
         }
       }
+    }
+  },
+  "securityDefinitions": {
+    "key": {
+      "type": "apiKey",
+      "name": "x-token",
+      "in": "header"
     }
   }
 }`))

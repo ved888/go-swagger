@@ -10,7 +10,11 @@ produces:
   - application/json
 schemes:
   - http
-
+securityDefinitions:
+  key:
+    type: apiKey
+    in: header
+    name: x-token
 swagger: "2.0"
 definitions:
   movie:
@@ -29,6 +33,55 @@ definitions:
         type: string
         minLength: 2
 
+  Login:
+    type: object
+    required: [UserEmail,UserPhone]
+    properties:
+      UserEmail:
+        type: string
+        format: abc@gmail.com
+      UserPhone:
+        type: string
+        minLength: 10
+        maxLength: 10
+  LoginSuccess:
+      type: object
+      properties:
+        success:
+          type: boolean
+        token:
+          type: string
+
+
+  Register:
+    type: object
+    required:
+      - Name
+      - Email
+      - Phone
+      - DOB
+    properties:
+      Address:
+        type: string
+        minLength: 2
+      DOB:
+        type: string
+        format: yyyy-mm-dd
+      Email:
+        type: string
+        format: abc@gmail.com
+      Name:
+        type: string
+        minLength: 2
+      Phone:
+        type: string
+        minLength: 10
+        maxLength: 10
+      userId:
+        type: integer
+        format: int64
+        readOnly: true
+
   error:
     type: object
     required:
@@ -41,6 +94,53 @@ definitions:
         type: string
 
 paths:
+  /user/create:
+    post:
+      tags:
+        - user
+      description: create user by given fields
+      parameters:
+        - description: create user with given input payload
+          in: body
+          name: Register
+          required: true
+          schema:
+            $ref: '#/definitions/Register'
+      responses:
+        200:
+         description: create the user operations
+         schema:
+          $ref: "#/definitions/Register"
+        default:
+         description: failed to create user
+         schema:
+          $ref: "#/definitions/error"
+      summary: create user by given payload.
+
+  /login:
+    post:
+      tags:
+        - user
+      description: Login user by email and phone number
+      parameters:
+        - description: Login user by given payload
+          in: body
+          name: Login
+          required: true
+          schema:
+            $ref: '#/definitions/Login'
+      responses:
+        200:
+          description: login the user operations
+          schema:
+            $ref: "#/definitions/LoginSuccess"
+        default:
+          description: failed to login user
+          schema:
+            $ref: "#/definitions/error"
+      summary: login user by given email and phone.
+
+
   /movie/create:
     post:
       tags:
